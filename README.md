@@ -189,7 +189,7 @@ ddev coverage
 ddev docs
 ddev examples
 ddev format
-ddev saucelabs-tests
+ddev saucelabs
 ddev gen-test-runner
 ddev test
 
@@ -200,7 +200,7 @@ pub run dart_dev coverage
 pub run dart_dev docs
 pub run dart_dev examples
 pub run dart_dev format
-pub run dart_dev saucelabs-tests
+pub run dart_dev saucelabs
 pub run dart_dev gen-test-runner
 pub run dart_dev test
 ```
@@ -227,7 +227,7 @@ main(args) async {
   config.format
   config.genTestRunner
   config.init
-  config.saucelabsTests
+  config.saucelabs
   config.test
 
   await dev(args);
@@ -432,65 +432,6 @@ object.
     </tbody>
 </table>
 
-#### `saucelabs-tests` Config
-All configuration options for the `saucelabs-test` task are found on the `config.saucelabsTests`
-object.
-
-<table>
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Default</th>
-            <th>Description</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td><code>filesToTest</code></td>
-            <td><code>List&lt;String&gt;</code></td>
-            <td><code>[]</code></td>
-            <td>Html files related to browser tests to be executed on saucelabs</td>
-        </tr>
-        <tr>
-            <td><code>platforms</code></td>
-            <td><code>List&lt;SaucePlatforms&gt;</code></td>
-            <td><code>[chromeWindows, firefoxWindows, chromeOsx, firefoxOsx, ie10, ie11]</code></td>
-            <td>Platforms to be executed on saucelabs</td>
-        </tr>
-        <tr>
-            <td><code>pubServer</code></td>
-            <td><code>int</code></td>
-            <td><code>0</code></td>
-            <td>Specify the port to run the tests on, otherwise specifying 0 will use a random port</td>
-        </tr>
-        <tr>
-            <td><code>sauceConnectTunnelIdentifier</code></td>
-            <td><code>String</code></td>
-            <td><code>null</code></td>
-            <td>The sauce connect tunnel to use, if null then a tunnel will be automatically started</td>
-        </tr>
-        <tr>
-            <td><code>testReportPath</code></td>
-            <td><code>String</code></td>
-            <td><code>test_reports/sauce_labs_unit_tests.xml</code></td>
-            <td>Path for test_report</td>
-        </tr>        
-    </tbody>
-</table>
-
-* In order to use this the following transformer needs to be added to your pubspec.yaml, it must also be applied after the test transformer
-
-```
-- dart_dev/src/sauce_test_harness_transformer:
-    $include: [
-       "test/**_test{.*,}.dart",
-       "test/**_test{.*,}.html",
-      ]
-```
-
-* The html files to be transformed should have the `packages/test/dart.js` script tag listed last.
-
 #### `gen-test-runner` Config
 All configuration options for the `gen-test-runner` task are found on the `config.genTestRunner`
 object.
@@ -572,6 +513,67 @@ object.
         </tr>
     </tbody>
 </table>
+
+#### `saucelabs` Config
+All configuration options for the `saucelabs` task are found on the `config.saucelabs`
+object.
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>filesToTest</code></td>
+            <td><code>List&lt;String&gt;</code></td>
+            <td><code>[]</code></td>
+            <td>Html files related to browser tests to be executed on saucelabs (the path will be relative to the test directory)</td>
+        </tr>
+        <tr>
+            <td><code>platforms</code></td>
+            <td><code>List&lt;SaucePlatform&gt;</code></td>
+            <td><code>[chromeWindows, firefoxWindows, chromeOsx, firefoxOsx, ie10, ie11]</code></td>
+            <td>Platforms to be executed on saucelabs</td>
+        </tr>
+        <tr>
+            <td><code>pubServer</code></td>
+            <td><code>int</code></td>
+            <td><code>0</code></td>
+            <td>Specify the port to run the tests on, otherwise specifying 0 will use a random port</td>
+        </tr>
+        <tr>
+            <td><code>sauceConnectTunnelIdentifier</code></td>
+            <td><code>String</code></td>
+            <td><code>null</code></td>
+            <td>The sauce connect tunnel to use, if null then a tunnel will be automatically started</td>
+        </tr>
+        <tr>
+            <td><code>testReportPath</code></td>
+            <td><code>String</code></td>
+            <td><code>test_reports/sauce_labs_unit_tests.xml</code></td>
+            <td>Path for test_report</td>
+        </tr>        
+    </tbody>
+</table>
+
+* In order to use this the following transformer needs to be added to your pubspec.yaml, it must also be applied after the test transformer
+
+```
+- dart_dev/src/sauce_test_harness_transformer:
+    $include: [
+       "test/**_test{.*,}.dart",
+       "test/**_test{.*,}.html",
+      ]
+```
+
+* The html files to be transformed should have the `packages/test/dart.js` script tag listed last.
+
+* During this process the test directory will be served which means that the `filesToTest` must be within the test directory and their path will be relative to the test directory.
 
 #### `test` Config
 All configuration options for the `test` task are found on the `config.test`
@@ -673,7 +675,7 @@ Supported tasks:
     format
     gen-test-runner
     init
-    saucelabs-tests
+    saucelabs
     test
 ```
 
