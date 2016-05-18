@@ -19,12 +19,7 @@ import 'package:dart_dev/src/tasks/saucelabs/platforms.dart';
 
 const String defaultBuildName = 'saucelabs';
 const List<SaucePlatform> defaultPlatforms = const <SaucePlatform>[
-  chromeWindows,
-  firefoxWindows,
-  chromeOsx,
-  firefoxOsx,
-  ie10,
-  ie11,
+  chrome
 ];
 const int defaultPubServePort = 0;
 const String defaultSauceConnectTunnelIdentifier = null;

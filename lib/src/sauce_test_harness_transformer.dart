@@ -231,6 +231,9 @@ class SauceTestHarnessTransformer extends Transformer
             @override
             displayPause() =>
                 throw new UnsupportedError("SauceBrowserEnvironment.displayPause is not supported.");
+
+            @override
+            bool get supportsDebugging => false;
           }
         '''));
   }
