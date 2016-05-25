@@ -70,7 +70,14 @@ need to know how to use the `dart_dev` tool.
 > interface for interacting with said tooling in a simplified manner.
 
 
-## Supported Tasks
+## Tasks
+
+A task is a single unit of execution within `dart_dev`. They are identified by
+a name and may or may not take arguments. Several supported tasks are provided
+by default. Consumers can supplement the supported tasks with project specific
+local tasks.
+
+### Supported Tasks
 
 - **Tests:** runs test suites (unit, integration, and functional) via the [`test` package test runner](https://github.com/dart-lang/test).
 - **Coverage:** collects coverage over test suites (unit, integration, and functional) and generates a report. Uses the [`coverage` package](https://github.com/dart-lang/coverage).
@@ -82,6 +89,17 @@ need to know how to use the `dart_dev` tool.
 - **Running dart unit tests on Sauce Labs** compiles dart unit tests that can be run in the browser and executes them on various platforms using Sauce Labs.
 - **Generate a test runner file:** that allows for faster test execution.
 
+
+### Local Tasks
+
+A local task is a script or program that is discovered by `dart_dev`. By
+default, dart dev will recursively look for files in the project level `tool` 
+directory that match the filename pattern `(task_name)_task.(executable_type)`.
+Any file matching this pattern will be parsed and registered as a task.
+
+Executable types identify how a given task should execute. Dart and bash
+scripts are supported out of the box. The set of available executable types can
+be expanded in the configuration as documented below.
 
 ## Getting Started
 
@@ -104,10 +122,14 @@ alias ddev='pub run dart_dev'
 
 #### Bash Completion
 
-Symlink or copy the file `tool/ddev-completion.sh` into
-`/etc/bash_completion.d/` (or wherever your completion scripts live, if you
-have installed Bash through Homebrew on a Mac, for instance, this will be
-`/usr/local/etc/bash_completion.d/`).
+Bash command completion is available and easy to use. You'll want to install
+dart_dev globally: `pub global activate dart_dev`.
+
+Add the following to your `.bashrc`:
+
+```
+eval "$(pub global run dart_dev bash-completion)"
+```
 
 If you are using Bash installed through Homebrew, you'll also need to install
 the completion machinery with `brew install bash-completion`. Then make sure
@@ -134,7 +156,22 @@ autoload -U compinit
 compinit
 autoload -U bashcompinit
 bashcompinit
-source <path/to/ddev-completion.sh>
+eval "$(pub global run dart_dev bash-completion)"
+```
+
+#### Fish Completion
+
+Symlink or copy the file `tool/ddev.fish` into `~/.config/fish/completions/`
+(or wherever your completion scripts live).
+
+The completions expect a function called `ddev`. To meet this expectation create
+a new file in `~/.config/fish/functions` called `ddev.fish` and add the
+following content to the file.
+
+```fish
+function ddev
+  pub run dart_dev $argv
+end
 ```
 
 #### Configuration
@@ -161,6 +198,12 @@ main(args) async {
   // Define the directories to include when running the
   // Dart formatter.
   config.format.directories = ['lib/', 'test/', 'tool/'];
+
+  // Define overrides for local task discovery
+  config.local
+    ..taskPaths.add('bin')
+    ..commandFilePattern = '([a-zA-Z0-9]+)_task.([a-zA-Z0-9]+)'
+    ..executables['go'] = ['go', 'run'];
 
   // Define the location of your test suites.
   config.test
@@ -457,6 +500,42 @@ object.
     </tbody>
 </table>
 
+#### Local Config
+All configuration options for the local task discovery are found on the
+`config.local` object.
+
+##### Local Discovery
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>taskPaths</code></td>
+            <td><code>List&lt;String&gt;</code></td>
+            <td><code>['tool']</code></td>
+            <td>A list of project level paths to search for file matching the task pattern.</td>
+        </tr>
+        <tr>
+            <td><code>commandFilePattern</code></td>
+            <td><code>String</code></td>
+            <td><code>'([a-zA-Z0-9]+)_task.([a-zA-Z0-9]+)'</code></td>
+            <td>A Regular Expression which matches two groups that represent the task name and executable type.</td>
+        </tr>
+        <tr>
+            <td><code>executables</code></td>
+            <td><code>Map&lt;String, List&lt;String&gt;&gt;</code></td>
+            <td><code>'{'dart': ['dart'], 'sh': ['bash'] }'</code></td>
+            <td>A lookup table that matches an executable type to a set of strings to prefix the execution of a task file with.</td>
+        </tr>
+    </tbody>
+</table>
+
 ##### `TestRunnerConfig`
 
 <table>
@@ -636,7 +715,6 @@ object.
     </tbody>
 </table>
 * Individual test files can be executed by appending their path to the end of the command.
-
 ```
 ddev test path/to/test_name path/to/another/test_name
 ```
@@ -646,6 +724,11 @@ ddev test path/to/test_name path/to/another/test_name
 ddev test -n 'run only this test'
 ```
 
+* A new `pub serve` instance is created for every test run. To use a specific `pub serve` instance, pass `--pub-serve-port` to the CLI.
+```
+$ pub serve --port 56001 test
+$ ddev test --pub-serve --pub-serve-port 56001
+```
 
 ## CLI Usage
 This package comes with a single executable: `dart_dev`. To run this executable:

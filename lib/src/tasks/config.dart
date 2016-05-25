@@ -15,6 +15,7 @@
 library dart_dev.src.tasks.config;
 
 import 'package:dart_dev/src/tasks/analyze/config.dart';
+import 'package:dart_dev/src/tasks/bash_completion/config.dart';
 import 'package:dart_dev/src/tasks/copy_license/config.dart';
 import 'package:dart_dev/src/tasks/coverage/config.dart';
 import 'package:dart_dev/src/tasks/docs/config.dart';
@@ -24,15 +25,18 @@ import 'package:dart_dev/src/tasks/gen_test_runner/config.dart';
 import 'package:dart_dev/src/tasks/init/config.dart';
 import 'package:dart_dev/src/tasks/saucelabs/config.dart';
 import 'package:dart_dev/src/tasks/test/config.dart';
+import 'package:dart_dev/src/tasks/local/config.dart';
 
 Config config = new Config();
 
 class Config {
   AnalyzeConfig analyze = new AnalyzeConfig();
+  BashCompletionConfig bashCompletion = new BashCompletionConfig();
   CopyLicenseConfig copyLicense = new CopyLicenseConfig();
   CoverageConfig coverage = new CoverageConfig();
   DocsConfig docs = new DocsConfig();
   ExamplesConfig examples = new ExamplesConfig();
+  LocalConfig local = new LocalConfig();
   FormatConfig format = new FormatConfig();
   GenTestRunnerConfig genTestRunner = new GenTestRunnerConfig();
   InitConfig init = new InitConfig();

@@ -18,7 +18,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
-
+import 'package:completion/completion.dart';
 import 'package:dart_dev/util.dart'
     show
         TaskProcess,
@@ -30,6 +30,7 @@ import 'package:dart_dev/src/tasks/cli.dart';
 import 'package:dart_dev/src/tasks/config.dart';
 
 import 'package:dart_dev/src/tasks/analyze/cli.dart';
+import 'package:dart_dev/src/tasks/bash_completion/cli.dart';
 import 'package:dart_dev/src/tasks/copy_license/cli.dart';
 import 'package:dart_dev/src/tasks/coverage/cli.dart';
 import 'package:dart_dev/src/tasks/docs/cli.dart';
@@ -38,6 +39,7 @@ import 'package:dart_dev/src/tasks/format/cli.dart';
 import 'package:dart_dev/src/tasks/gen_test_runner/cli.dart';
 import 'package:dart_dev/src/tasks/init/cli.dart';
 import 'package:dart_dev/src/tasks/saucelabs/cli.dart';
+import 'package:dart_dev/src/tasks/local/cli.dart';
 import 'package:dart_dev/src/tasks/test/cli.dart';
 
 import 'package:dart_dev/src/version.dart' show printVersion;
@@ -57,6 +59,7 @@ String _topLevelUsage = _parser.usage;
 
 dev(List<String> args) async {
   registerTask(new AnalyzeCli(), config.analyze);
+  registerTask(new BashCompletionCli(), config.bashCompletion);
   registerTask(new CopyLicenseCli(), config.copyLicense);
   registerTask(new CoverageCli(), config.coverage);
   registerTask(new DocsCli(), config.docs);
@@ -67,11 +70,27 @@ dev(List<String> args) async {
   registerTask(new SauceRunnerCli(), config.saucelabs);
   registerTask(new TestCli(), config.test);
 
+  try {
+    LocalCli.discover(config.local.taskPaths).forEach((task, exec) {
+      registerTask(new LocalCli(task, exec), config.local);
+    });
+  } on ArgumentError catch (e) {
+    reporter.error('${e.message}\n\nPlease update your local configuration.',
+        shout: true);
+    exit(exitCode);
+  }
+
   await _run(args);
   exit(exitCode);
 }
 
 void registerTask(TaskCli cli, TaskConfig config) {
+  if (_cliTasks[cli.command] != null) {
+    throw new ArgumentError(
+        'A task is attempting to use the task name "${cli.command}" which'
+        ' has already been registered.');
+  }
+
   _cliTasks[cli.command] = cli;
   _cliConfigs[cli.command] = config;
 }
@@ -105,7 +124,7 @@ Future _run(List<String> args) async {
 
   ArgResults env;
   try {
-    env = _parser.parse(args);
+    env = tryArgsCompletion(args, _parser);
   } on FormatException catch (e) {
     reporter.error('${e.message}\n', shout: true);
     reporter.log(_generateUsage(), shout: true);
