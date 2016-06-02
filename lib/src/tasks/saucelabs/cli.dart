@@ -30,7 +30,13 @@ import 'package:dart_dev/src/tasks/saucelabs/xml_reporter.dart';
 class SauceRunnerCli extends TaskCli {
   final ArgParser argParser = new ArgParser()
     ..addOption('build-name',
-        abbr: 'b', defaultsTo: 'saucelabs', help: 'Build name for the run.');
+        abbr: 'b', defaultsTo: 'saucelabs', help: 'Build name for the run.')
+    ..addFlag('new-sauce-tunnel',
+        defaultsTo: true,
+        negatable: true,
+        help: 'Create a new sauce-connect tunnel.')
+    ..addOption('sauce-tunnel-identifier',
+        abbr: 'i', help: 'Identifier to use in sauce tunnel creation.');
 
   final String command = 'saucelabs';
 
@@ -53,18 +59,16 @@ class SauceRunnerCli extends TaskCli {
       sauceTests.add(new sauceRunner.SauceTest(file, file));
     }
 
+    var autoSauceConnect =
+        TaskCli.valueOf('new-sauce-tunnel', parsedArgs, true);
     var buildName =
         TaskCli.valueOf('build-name', parsedArgs, config.saucelabs.buildName);
+    var tunnelIdentifier = TaskCli.valueOf('sauce-tunnel-identifier',
+        parsedArgs, config.saucelabs.sauceConnectTunnelIdentifier);
 
     final int pubServePort = config.saucelabs.pubServePort ?? 0;
 
-    var autoSauceConnect;
-    var tunnelIdentifier;
-    if (config.saucelabs.sauceConnectTunnelIdentifier != null) {
-      autoSauceConnect = false;
-      tunnelIdentifier = config.saucelabs.sauceConnectTunnelIdentifier;
-    } else {
-      autoSauceConnect = true;
+    if (tunnelIdentifier == null) {
       tunnelIdentifier = generateTunnelIdentifier();
     }
 

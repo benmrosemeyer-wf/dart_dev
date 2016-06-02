@@ -18,9 +18,7 @@ import 'package:dart_dev/src/tasks/config.dart';
 import 'package:dart_dev/src/tasks/saucelabs/platforms.dart';
 
 const String defaultBuildName = 'saucelabs';
-const List<SaucePlatform> defaultPlatforms = const <SaucePlatform>[
-  chrome
-];
+const List<SaucePlatform> defaultPlatforms = const <SaucePlatform>[chrome];
 const int defaultPubServePort = 0;
 const String defaultSauceConnectTunnelIdentifier = null;
 const String defaultTestReportsPath = 'test_reports/sauce_labs_unit_tests.xml';
